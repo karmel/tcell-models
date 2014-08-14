@@ -16,7 +16,7 @@ class GTPDependent(Molecule):
     def __init__(self, GDP=0, GTP=0, unbound=0):
         self.GDP = GDP
         self.GTP = GTP
-        self.unbound = 0
+        self.unbound = unbound
         
         super().__init__(GDP + GTP + unbound)
         
@@ -28,6 +28,9 @@ class GTPDependent(Molecule):
         self.add_mod('GTP', amt)
     def remove_GTP(self, amt=1):
         self.remove_mod('GTP', amt)
+    
+    def update_concentration(self):
+        self.concentration = self.GDP + self.GTP + self.unbound
         
     def add_mod(self, mod, amt):
         '''
@@ -35,6 +38,7 @@ class GTPDependent(Molecule):
         '''
         setattr(self, mod, getattr(self, mod) + amt)
         self.unbound -= amt
+        self.update_concentration()
         
     def remove_mod(self, mod, amt):
         '''
@@ -42,13 +46,14 @@ class GTPDependent(Molecule):
         '''
         setattr(self, mod, getattr(self, mod) - amt)
         self.unbound += amt
-    
+        self.update_concentration()
+        
 class Sos(GTPDependent):
     '''
     SOS (Son of sevenless) catalytic domain.
     Can be bound by GTP (very active) or GDP (less inactive).
-    '''
-    
+    '''    
+        
 class Ras(GTPDependent):
     '''
     GTPase Ras. Can be bound by GTP (active) or GDP (inactive). 

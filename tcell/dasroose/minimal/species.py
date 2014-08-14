@@ -8,22 +8,45 @@ TCR signaling via Ras and SOS.
 '''
 from tcell.base.species import Molecule
 
-GTP = 1
-GDP = 0
-
 class GTPDependent(Molecule):
-    bound_by = None
+    unbound = 0
+    GDP = 0
+    GTP = 0
     
-    @property
-    def is_active(self):
+    def __init__(self, GDP=0, GTP=0, unbound=0):
+        self.GDP = GDP
+        self.GTP = GTP
+        self.unbound = 0
+        
+        super().__init__(GDP + GTP + unbound)
+        
+    def add_GDP(self, amt=1):
+        self.add_mod('GDP', amt)
+    def remove_GDP(self, amt=1):
+        self.remove_mod('GDP', amt)
+    def add_GTP(self, amt=1):
+        self.add_mod('GTP', amt)
+    def remove_GTP(self, amt=1):
+        self.remove_mod('GTP', amt)
+        
+    def add_mod(self, mod, amt):
         '''
-        When bound by RasGTP, 75x more activity --> on. Otherwise, off.
+        Total amount stays the same, so make sure to keep everything in check.
         '''
-        return bool(self.bound_by)
+        setattr(self, mod, getattr(self, mod) + amt)
+        self.unbound -= amt
+        
+    def remove_mod(self, mod, amt):
+        '''
+        Total amount stays the same, so make sure to keep everything in check.
+        '''
+        setattr(self, mod, getattr(self, mod) - amt)
+        self.unbound += amt
     
 class Sos(GTPDependent):
     '''
     SOS (Son of sevenless) catalytic domain.
+    Can be bound by GTP (very active) or GDP (less inactive).
     '''
     
 class Ras(GTPDependent):
@@ -31,7 +54,7 @@ class Ras(GTPDependent):
     GTPase Ras. Can be bound by GTP (active) or GDP (inactive). 
     '''
     
-class GAPS(Molecule):
+class RasGAP(Molecule):
     '''
     Converts Ras-GTP back to Ras-GDP--> inhibitor.
     '''

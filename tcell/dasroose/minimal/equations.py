@@ -3,7 +3,6 @@ Created on Aug 13, 2014
 
 @author: karmel
 '''
-from tcell.dasroose.minimal.constants import Rates
 
 class Reactions(object):
     '''

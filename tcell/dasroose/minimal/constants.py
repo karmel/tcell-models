@@ -11,17 +11,17 @@ class Rates(object):
     k2f = 0
     k2r = 0
     
-    kcat3 = 0
     k3f = 0
     k3r = 0
+    kcat3 = 0
     
-    kcat4 = 0
     k4f = 0
     k4r = 0
+    kcat4 = 0
     
-    kcat5 = 0
     k5f = 0
     k5r = 0
+    kcat5 = 0
     
     def __init__(self, *args, **kwargs):
         '''
@@ -31,15 +31,15 @@ class Rates(object):
         
         if kwargs:
             for key, val in kwargs.items():
-                self.__setattr__(key, val)
+                setattr(self, key, val)
         else:
             props = ('k1f', 'k1r', 'k2f', 'k2r',
-                     'kcat3', 'k3f', 'k3r',
-                     'kcat4', 'k4f', 'k4r',
-                     'kcat5', 'k5f', 'k5r',)
+                     'k3f', 'k3r', 'kcat3',
+                     'k4f', 'k4r', 'kcat4',
+                     'k5f', 'k5r', 'kcat5',)
             for i, prop in enumerate(props):
                 try: 
-                    self.__setattr__(prop, args[i])
+                    setattr(self, key, args[i])
                 except IndexError: break
             
         

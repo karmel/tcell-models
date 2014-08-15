@@ -37,9 +37,11 @@ class Sos(GTPDependent):
         '''
         SOS starts with number of molecules, not concentration.
         '''
-        super().__init__(**kwargs)
         if num_molecules:
             self.unbound = num_molecules
+            self.num_molecules = num_molecules
+        else:
+            super().__init__(**kwargs)
 
 
 class Ras(GTPDependent):
@@ -56,7 +58,9 @@ class RasGAP(Molecule):
     '''
 
     def __init__(self, concentration=None, **kwargs):
-        super().__init__(**kwargs)
+
         if concentration:
             box = DiffusionBox()
             self.num_molecules = box.cytosolic_to_absolute(concentration)
+        else:
+            super().__init__(**kwargs)

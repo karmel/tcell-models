@@ -33,7 +33,7 @@ class Reactions(object):
             Sos_tot = self.Sos_tot
         if not Ras_tot:
             Ras_tot = self.Ras_tot
-        print(Sos_tot, Sos, Sos_GTP)
+
         Sos_GDP = Sos_tot - Sos - Sos_GTP
         RasGDP = Ras_tot - RasGTP - Sos_GDP - Sos_GTP
 
@@ -58,7 +58,7 @@ class Reactions(object):
         if not RasGAP:
             RasGAP = self.RasGAP
 
-        Sos_GDP = Sos_tot - Sos_GTP
+        Sos_GDP = Sos_tot - Sos - Sos_GTP
         RasGDP = Ras_tot - RasGTP - Sos_GDP - Sos_GTP
         val = -rates.k2f * Sos * RasGTP \
             + rates.k2r * Sos_GTP \

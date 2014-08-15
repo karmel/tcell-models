@@ -22,17 +22,17 @@ if __name__ == '__main__':
              box.convert_membrane_rate(0.11), 0.4,
              box.convert_membrane_rate(0.05), 0.1, 0.038,
              box.convert_membrane_rate(0.07), 1.0, 0.003,
-             box.convert_membrane_rate(1.74), 0.2, 0.1]
+             box.convert_cytosolic_rate(1.74), 0.2, 0.1]
     print(rates)
     rates = Rates(*rates)
-
+    print(rates.K3m, rates.K4m, rates.K5m)
     # We have used a intial Ras-GDP, and Ras-GAP concentrations of
     # 75 molecules/(um)2, 125 molecules/(um)3 respectively.
     ras = Ras(GDP=75)
     rasgap = RasGAP(125)
 
     # Do the simplest thing first. Solve the ODE ignoring SOS-RasGTP
-    sos = Sos(num_molecules=10)
+    sos = Sos(num_molecules=100)
     reactions = Reactions(rates, sos.num_molecules,
                           ras.num_molecules, rasgap.num_molecules)
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         Sos_i = y[0]
         Sos_GTP_i = y[1]
         RasGTP_i = y[2]
-        print(y)
+
         f0 = reactions.dSos_dt(Sos_i, Sos_GTP_i, RasGTP_i)
         f1 = reactions.dSos_GTP_dt(Sos_i, Sos_GTP_i, RasGTP_i)
         f2 = reactions.dRasGTP_dt(Sos_i, Sos_GTP_i, RasGTP_i)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # Initial conditions
     y0 = [sos.unbound, sos.GTP, ras.GTP]
-    t = np.linspace(0, 50., 10000)
+    t = np.linspace(0, 600., 10000)
 
     solution = odeint(dy_dt, y0, t)
     Sos_unbound = solution[:, 0]
@@ -62,4 +62,8 @@ if __name__ == '__main__':
     plt.plot(t, Sos_GTP, label='SOS-RasGTP')
     plt.plot(t, RasGTP, label='RasGTP')
     plt.legend()
+    plt.xlabel('Time')
+    plt.ylabel('Molecule count')
+    plt.title('Das Minimal Model: Species presence (SOS initial: {})'.format(
+        sos.num_molecules))
     plt.show()

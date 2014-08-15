@@ -43,7 +43,7 @@ class Reactions(object):
             + rates.k2r * Sos_GTP
         return val
 
-   def dRasGTP_dt(self, Sos, Sos_GTP, RasGTP,
+    def dRasGTP_dt(self, Sos, Sos_GTP, RasGTP,
                    Sos_tot=None, Ras_tot=None, RasGAP=None):
         rates = self.rates
         if not Sos_tot:

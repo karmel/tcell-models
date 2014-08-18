@@ -76,10 +76,8 @@ class RasGAP(ConcentrationMolecule):
     location = 'cytosolic'
 
 
-class RasGRP(ConcentrationMolecule):
+class RasGRP(Molecule):
 
     '''
     Converts Ras-GDP to Ras-GDP, albeit at a slower rate than SOS.
     '''
-
-    location = 'cytosolic'

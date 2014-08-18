@@ -198,7 +198,7 @@ if __name__ == '__main__':
              box.convert_membrane_rate(0.05), 0.1, 0.038,
              box.convert_membrane_rate(0.07), 1.0, 0.003,
              box.convert_cytosolic_rate(1.74), 0.2, 0.1,
-             box.convert_cytosolic_rate(0.33), 1.0, 0.01]
+             box.convert_membrane_rate(0.33), 1.0, 0.01]
     rates = Rates(*rates)
 
     # We have used a intial Ras-GDP, and Ras-GAP concentrations of
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     ras = Ras(GDP=75)
     rasgap = RasGAP(125)
 
-    for x in range(0, 100, 10):
+    for x in range(0, 200, 10):
         rasgrp = RasGRP(x)
 
         output_dirname = os.path.join(

@@ -27,6 +27,11 @@ class Rates(object):
     kcat5 = 0
     K5m = 0
 
+    k8f = 0
+    k8r = 0
+    kcat8 = 0
+    K8m = 0
+
     def __init__(self, *args, **kwargs):
         '''
         Allow for keyword-specified rate setting OR just in-order lists.
@@ -41,7 +46,8 @@ class Rates(object):
                      'k2f', 'k2r',
                      'k3f', 'k3r', 'kcat3',
                      'k4f', 'k4r', 'kcat4',
-                     'k5f', 'k5r', 'kcat5',)
+                     'k5f', 'k5r', 'kcat5',
+                     'k8f', 'k8r', 'kcat8',)
             for i, prop in enumerate(props):
                 try:
                     setattr(self, prop, args[i])
@@ -52,6 +58,7 @@ class Rates(object):
         self.K3m = self.calc_Km(self.k3f, self.k3r, self.kcat3)
         self.K4m = self.calc_Km(self.k4f, self.k4r, self.kcat4)
         self.K5m = self.calc_Km(self.k5f, self.k5r, self.kcat5)
+        self.K8m = self.calc_Km(self.k8f, self.k8r, self.kcat8)
 
     def calc_Km(self, kf, kr, kcat):
         '''

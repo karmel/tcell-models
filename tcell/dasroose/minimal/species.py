@@ -10,6 +10,22 @@ from tcell.base.species import Molecule
 from tcell.dasroose.minimal.constants import DiffusionBox
 
 
+class ConcentrationMolecule(Molecule):
+
+    location = 'membrane'
+
+    def __init__(self, concentration=None, **kwargs):
+
+        if concentration is not None:
+            box = DiffusionBox()
+            if self.location == 'cytosolic':
+                self.num_molecules = box.cytosolic_to_absolute(concentration)
+            else:
+                self.num_molecules = box.membrane_to_absolute(concentration)
+        else:
+            super().__init__(**kwargs)
+
+
 class GTPDependent(Molecule):
     unbound = 0
     GDP = 0
@@ -51,16 +67,19 @@ class Ras(GTPDependent):
     '''
 
 
-class RasGAP(Molecule):
+class RasGAP(ConcentrationMolecule):
 
     '''
     Converts Ras-GTP back to Ras-GDP--> inhibitor.
     '''
 
-    def __init__(self, concentration=None, **kwargs):
+    location = 'cytosolic'
 
-        if concentration:
-            box = DiffusionBox()
-            self.num_molecules = box.cytosolic_to_absolute(concentration)
-        else:
-            super().__init__(**kwargs)
+
+class RasGRP(ConcentrationMolecule):
+
+    '''
+    Converts Ras-GDP to Ras-GDP, albeit at a slower rate than SOS.
+    '''
+
+    location = 'cytosolic'

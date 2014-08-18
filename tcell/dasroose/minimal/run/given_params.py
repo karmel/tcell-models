@@ -140,8 +140,8 @@ def plot_molecule_count(rates, ras, rasgap, rasgrp, output_dirname='output'):
     return final_vals
 
 
-def find_steady_states(rates, ras, rasgap, rasgrp, guesses,
-                       output_dirname='output'):
+def find_steady_states_sos(rates, ras, rasgap, rasgrp, guesses,
+                           output_dirname='output'):
     '''
     Solve for steady states. We start with the guesses
     obtained from solving the ODE to plot it. We then bootstrap
@@ -207,6 +207,8 @@ if __name__ == '__main__':
     rasgap = RasGAP(125)
 
     for x in range(0, 200, 10):
+
+        # Vary RasGRP in the outer circle, SOS in inner.
         rasgrp = RasGRP(x)
 
         output_dirname = os.path.join(
@@ -217,5 +219,11 @@ if __name__ == '__main__':
 
         final_vals = plot_molecule_count(rates, ras, rasgap, rasgrp,
                                          output_dirname)
-        find_steady_states(rates, ras, rasgap, rasgrp, final_vals,
-                           output_dirname)
+        find_steady_states_sos(rates, ras, rasgap, rasgrp, final_vals,
+                               output_dirname)
+
+        # Vary SOS in the outer circle, RasGRP in inner.
+        sos = Sos(x)
+        output_dirname = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            'output', 'sos_{}'.format(x))

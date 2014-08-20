@@ -47,7 +47,7 @@ def solve_ode(sos, ras, rasgap, rasgrp):
 
 def plot_molecule_count(rates, ras, rasgap, rasgrp, output_dirname='output'):
     final_vals = {}
-    for sos_mol in range(50, 250, 10):
+    for sos_mol in range(0, 250, 10):
 
         sos = Sos(num_molecules=sos_mol)
 
@@ -140,8 +140,8 @@ def plot_molecule_count(rates, ras, rasgap, rasgrp, output_dirname='output'):
     return final_vals
 
 
-def find_steady_states_sos(rates, ras, rasgap, rasgrp, guesses,
-                           output_dirname='output'):
+def find_steady_states(rates, ras, rasgap, rasgrp, guesses,
+                       output_dirname='output'):
     '''
     Solve for steady states. We start with the guesses
     obtained from solving the ODE to plot it. We then bootstrap
@@ -177,8 +177,7 @@ def find_steady_states_sos(rates, ras, rasgap, rasgrp, guesses,
     plt.xlabel('Initial SOS Count')
     plt.ylabel('Steady State Count')
 
-    title = 'Das Minimal Model- Steady State RasGTP'.format(
-        sos.num_molecules)
+    title = 'Das Minimal Model- Steady State RasGTP'
     dirname = os.path.join(output_dirname, 'steady_states')
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -186,6 +185,38 @@ def find_steady_states_sos(rates, ras, rasgap, rasgrp, guesses,
     plt.savefig(os.path.join(dirname, title.replace(' ', '-') + '.png'))
     # plt.show()
     plt.close()
+
+    return steady_states
+
+
+def steady_states_by_rasgrp(rasgrp_steady_states, rasgrp_counts, sos_counts,
+                            output_dirname='output'):
+    '''
+    Given the full set of steady state output from the SOS set,
+    plot steady states when SOS is fixed while varying RasGRP1.
+    '''
+    for i, count in enumerate(sos_counts):
+        steady_states = [states[i] for states in rasgrp_steady_states]
+
+        # Steady states by starting Sos molecules
+        steady_states = np.array(steady_states)
+        plt.figure(figsize=[10, 8])
+        plt.plot(rasgrp_counts, steady_states[:, 0], 'o', label='SOS')
+        plt.plot(rasgrp_counts, steady_states[:, 1], 'o', label='SOS-RasGTP')
+        plt.plot(rasgrp_counts, steady_states[:, 2], 'o', label='RasGTP')
+        plt.legend()
+        plt.xlabel('Initial RasGRP1 Count')
+        plt.ylabel('Steady State Count')
+
+        title = 'Das Minimal Model- Steady State RasGTP (SOS Initial={})'.format(
+            count)
+        dirname = os.path.join(output_dirname, 'steady_states')
+        if not os.path.exists(dirname):
+            os.mkdir(dirname)
+        plt.title(title)
+        plt.savefig(os.path.join(dirname, title.replace(' ', '-') + '.png'))
+        # plt.show()
+        plt.close()
 
 
 if __name__ == '__main__':
@@ -206,7 +237,9 @@ if __name__ == '__main__':
     ras = Ras(GDP=75)
     rasgap = RasGAP(125)
 
-    for x in range(0, 200, 10):
+    rasgrp_final_vals, rasgrp_steady_states = [], []
+    rasgrp_counts = range(0, 200, 10)
+    for x in rasgrp_counts:
 
         # Vary RasGRP in the outer circle, SOS in inner.
         rasgrp = RasGRP(x)
@@ -219,11 +252,23 @@ if __name__ == '__main__':
 
         final_vals = plot_molecule_count(rates, ras, rasgap, rasgrp,
                                          output_dirname)
-        find_steady_states_sos(rates, ras, rasgap, rasgrp, final_vals,
-                               output_dirname)
+        steady_states = find_steady_states(rates, ras, rasgap, rasgrp,
+                                           final_vals, output_dirname)
 
-        # Vary SOS in the outer circle, RasGRP in inner.
-        sos = Sos(x)
-        output_dirname = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            'output', 'sos_{}'.format(x))
+        rasgrp_final_vals.append(final_vals)
+        rasgrp_steady_states.append(steady_states)
+
+    # Now we want to make the same steady state plot, but with respect
+    # to varying amounts of RasGRP1, not SOS.
+    # In rasgrp_steady_states, we have an outer loop of rasgrp values,
+    # and we want the steady state when SOS is zero from each.
+    output_dirname = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        'output', 'steady_state_by_rasgrp'.format(x))
+    if not os.path.exists(output_dirname):
+        os.makedirs(output_dirname)
+    sos_counts = list(rasgrp_final_vals[0].keys())
+    sos_counts.sort()
+    print(sos_counts)
+    steady_states_by_rasgrp(rasgrp_steady_states, rasgrp_counts, sos_counts,
+                            output_dirname)

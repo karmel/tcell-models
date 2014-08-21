@@ -45,9 +45,10 @@ def solve_ode(sos, ras, rasgap, rasgrp):
     return t, reactions, solution
 
 
-def plot_molecule_count(rates, ras, rasgap, rasgrp, output_dirname='output'):
+def plot_molecule_count(rates, sos_counts, ras, rasgap, rasgrp,
+                        output_dirname='output'):
     final_vals = {}
-    for sos_mol in range(0, 250, 10):
+    for sos_mol in sos_counts:
 
         sos = Sos(num_molecules=sos_mol)
 
@@ -140,7 +141,7 @@ def plot_molecule_count(rates, ras, rasgap, rasgrp, output_dirname='output'):
     return final_vals
 
 
-def find_steady_states(rates, ras, rasgap, rasgrp, guesses,
+def find_steady_states(rates, sos_counts, ras, rasgap, rasgrp, guesses,
                        output_dirname='output'):
     '''
     Solve for steady states. We start with the guesses
@@ -150,8 +151,8 @@ def find_steady_states(rates, ras, rasgap, rasgrp, guesses,
     print(guesses)
     last = None
     steady_states = []
-    sos_mol_counts = range(50, 250, 10)
-    for sos_mol in sos_mol_counts:
+
+    for sos_mol in sos_counts:
         sos = Sos(num_molecules=sos_mol)
         reactions = Reactions(rates, sos.num_molecules,
                               ras.num_molecules, rasgap.num_molecules,
@@ -170,9 +171,9 @@ def find_steady_states(rates, ras, rasgap, rasgrp, guesses,
     # Steady states by starting Sos molecules
     steady_states = np.array(steady_states)
     plt.figure(figsize=[10, 8])
-    plt.plot(sos_mol_counts, steady_states[:, 0], 'o', label='SOS')
-    plt.plot(sos_mol_counts, steady_states[:, 1], 'o', label='SOS-RasGTP')
-    plt.plot(sos_mol_counts, steady_states[:, 2], 'o', label='RasGTP')
+    plt.plot(sos_counts, steady_states[:, 0], 'o', label='SOS')
+    plt.plot(sos_counts, steady_states[:, 1], 'o', label='SOS-RasGTP')
+    plt.plot(sos_counts, steady_states[:, 2], 'o', label='RasGTP')
     plt.legend()
     plt.xlabel('Initial SOS Count')
     plt.ylabel('Steady State Count')
@@ -195,11 +196,14 @@ def steady_states_by_rasgrp(rasgrp_steady_states, rasgrp_counts, sos_counts,
     Given the full set of steady state output from the SOS set,
     plot steady states when SOS is fixed while varying RasGRP1.
     '''
+    # Right now we have rasgrp_count sets of sos_count steady states;
+    # We want sos_count on the outside, so we move through columns
+    # instead of rows
+    rasgrp_steady_states = np.array(rasgrp_steady_states)
     for i, count in enumerate(sos_counts):
-        steady_states = [states[i] for states in rasgrp_steady_states]
+        steady_states = rasgrp_steady_states[:, i]
 
         # Steady states by starting Sos molecules
-        steady_states = np.array(steady_states)
         plt.figure(figsize=[10, 8])
         plt.plot(rasgrp_counts, steady_states[:, 0], 'o', label='SOS')
         plt.plot(rasgrp_counts, steady_states[:, 1], 'o', label='SOS-RasGTP')
@@ -229,7 +233,7 @@ if __name__ == '__main__':
              box.convert_membrane_rate(0.05), 0.1, 0.038,
              box.convert_membrane_rate(0.07), 1.0, 0.003,
              box.convert_cytosolic_rate(1.74), 0.2, 0.1,
-             box.convert_membrane_rate(0.33), 1.0, 0.01]
+             0.01, 1.0, 0.01]
     rates = Rates(*rates)
 
     # We have used a intial Ras-GDP, and Ras-GAP concentrations of
@@ -239,6 +243,7 @@ if __name__ == '__main__':
 
     rasgrp_final_vals, rasgrp_steady_states = [], []
     rasgrp_counts = range(0, 200, 10)
+    sos_counts = range(0, 250, 10)
     for x in rasgrp_counts:
 
         # Vary RasGRP in the outer circle, SOS in inner.
@@ -250,10 +255,10 @@ if __name__ == '__main__':
         if not os.path.exists(output_dirname):
             os.makedirs(output_dirname)
 
-        final_vals = plot_molecule_count(rates, ras, rasgap, rasgrp,
-                                         output_dirname)
-        steady_states = find_steady_states(rates, ras, rasgap, rasgrp,
-                                           final_vals, output_dirname)
+        final_vals = plot_molecule_count(rates, sos_counts, ras, rasgap,
+                                         rasgrp, output_dirname)
+        steady_states = find_steady_states(rates, sos_counts, ras, rasgap,
+                                           rasgrp, final_vals, output_dirname)
 
         rasgrp_final_vals.append(final_vals)
         rasgrp_steady_states.append(steady_states)
@@ -264,11 +269,8 @@ if __name__ == '__main__':
     # and we want the steady state when SOS is zero from each.
     output_dirname = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        'output', 'steady_state_by_rasgrp'.format(x))
+        'output', 'steady_state_by_rasgrp')
     if not os.path.exists(output_dirname):
         os.makedirs(output_dirname)
-    sos_counts = list(rasgrp_final_vals[0].keys())
-    sos_counts.sort()
-    print(sos_counts)
     steady_states_by_rasgrp(rasgrp_steady_states, rasgrp_counts, sos_counts,
                             output_dirname)
